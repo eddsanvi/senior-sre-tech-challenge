@@ -1,14 +1,18 @@
 from fastapi import APIRouter, UploadFile, File, Form
+
 from app.models.user import User
+from app.services.s3 import upload_avatar
+from app.services.dynamodb import (
+    save_user,
+    get_users as load_users
+)
 
 router = APIRouter()
-
-users = []
 
 
 @router.get("/users")
 def get_users():
-    return users
+    return load_users()
 
 
 @router.post("/user")
@@ -18,12 +22,14 @@ async def create_user(
     avatar: UploadFile = File(...)
 ):
 
-    new_user = {
-        "name": name,
-        "email": email,
-        "avatar_url": f"/avatars/{avatar.filename}"
-    }
+    avatar_url = upload_avatar(avatar)
 
-    users.append(new_user)
+    user = User(
+        name=name,
+        email=email,
+        avatar_url=avatar_url
+    )
 
-    return new_user
+    save_user(user.model_dump())
+
+    return user

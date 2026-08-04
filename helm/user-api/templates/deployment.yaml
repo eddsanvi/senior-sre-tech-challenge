@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-api
+
+spec:
+  replicas: {{ .Values.replicaCount }}
+
+  selector:
+    matchLabels:
+      app: user-api
+
+  template:
+    metadata:
+      labels:
+        app: user-api
+
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+
+      containers:
+        - name: user-api
+
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          ports:
+            - containerPort: 8000
+
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8000
+
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8000
+
+          resources:
+{{ toYaml .Values.resources | indent 12 }}

@@ -1,6 +1,6 @@
 services:
   localstack:
-    image: localstack/localstack:latest
+    image: localstack/localstack:3.8
     container_name: localstack
 
     ports:
@@ -13,4 +13,3 @@ services:
 
     volumes:
       - ./localstack:/var/lib/localstack
-      - /var/run/docker.sock:/var/run/docker.sock

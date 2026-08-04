@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, Form
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 
 from app.models.user import User
 from app.services.s3 import upload_avatar
@@ -22,14 +22,29 @@ async def create_user(
     avatar: UploadFile = File(...)
 ):
 
-    avatar_url = upload_avatar(avatar)
+    if not avatar.filename:
+        raise HTTPException(
+            status_code=400,
+            detail="Avatar file is required"
+        )
 
-    user = User(
-        name=name,
-        email=email,
-        avatar_url=avatar_url
-    )
+    try:
 
-    save_user(user.model_dump())
+        avatar_url = upload_avatar(avatar)
 
-    return user
+        user = User(
+            name=name,
+            email=email,
+            avatar_url=avatar_url
+        )
+
+        save_user(user.model_dump())
+
+        return user
+
+    except Exception as exc:
+
+        raise HTTPException(
+            status_code=503,
+            detail=str(exc)
+        )

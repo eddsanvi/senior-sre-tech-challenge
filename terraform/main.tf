@@ -36,3 +36,73 @@ resource "aws_dynamodb_table" "users" {
     type = "S"
   }
 }
+
+resource "aws_iam_policy" "user_api_policy" {
+
+  name = "user-api-policy"
+
+  policy = jsonencode({
+
+    Version = "2012-10-17"
+
+    Statement = [
+
+      {
+        Effect = "Allow"
+
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket"
+        ]
+
+        Resource = "*"
+      },
+
+      {
+        Effect = "Allow"
+
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:Scan"
+        ]
+
+        Resource = "*"
+      }
+
+    ]
+  })
+}
+
+resource "aws_iam_role" "user_api_role" {
+
+  name = "user-api-role"
+
+  assume_role_policy = jsonencode({
+
+    Version = "2012-10-17"
+
+    Statement = [
+      {
+
+        Effect = "Allow"
+
+        Principal = {
+          Service = "eks.amazonaws.com"
+        }
+
+        Action = "sts:AssumeRole"
+
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "user_api_attach" {
+
+  role       = aws_iam_role.user_api_role.name
+
+  policy_arn = aws_iam_policy.user_api_policy.arn
+
+}

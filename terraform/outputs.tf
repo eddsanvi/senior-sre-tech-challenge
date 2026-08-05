@@ -5,3 +5,9 @@ output "bucket_name" {
 output "table_name" {
   value = aws_dynamodb_table.users.name
 }
+
+output "iam_role_name" {
+
+  value = aws_iam_role.user_api_role.name
+
+}

@@ -14,11 +14,24 @@ This project implements a Python-based REST API using FastAPI that allows:
 ## Architecture
 
 ```text
-FastAPI
-   |
-   +--> S3 (Avatar Storage)
-   |
-   +--> DynamoDB (User Metadata)
+                FastAPI
+                    |
+        +-----------+-----------+
+        |                       |
+        v                       v
+       S3                  DynamoDB
+
+Development:
+Docker + LocalStack
+
+Deployment:
+Helm + Kubernetes
+
+Infrastructure:
+Terraform
+
+CI/CD:
+GitHub Actions
 ```
 
 ## Features
@@ -101,6 +114,8 @@ Terraform provisions:
 
 - S3 Bucket
 - DynamoDB Table
+- IAM Policy
+- IAM Role
 
 Files:
 
@@ -110,6 +125,21 @@ terraform/
 ├── variables.tf
 └── outputs.tf
 ```
+
+---
+
+## Local AWS Emulation
+
+The project uses LocalStack Community Edition for local development.
+
+Services emulated:
+
+- S3
+- DynamoDB
+
+This allows validating AWS integrations without requiring an AWS account.
+
+For production deployments, LocalStack endpoints would be replaced by native AWS endpoints.
 
 ---
 
@@ -126,6 +156,7 @@ Components included:
 - Deployment
 - Service
 - ServiceAccount
+- IRSA-ready ServiceAccount
 - HorizontalPodAutoscaler
 - PodDisruptionBudget
 
@@ -134,6 +165,21 @@ Install:
 ```bash
 helm install user-api ./helm/user-api
 ```
+
+---
+
+## Reliability and Availability
+
+The solution includes several reliability-focused features:
+
+- Liveness probes
+- Readiness probes
+- Horizontal Pod Autoscaler (HPA)
+- PodDisruptionBudget (PDB)
+- ServiceAccount prepared for IRSA integration
+- Infrastructure as Code with Terraform
+- Automated CI validation
+- Security scanning using Trivy
 
 ---
 
@@ -184,8 +230,9 @@ pytest --cov=app
 Current coverage:
 
 ```text
-~75%
+~72-75%
 ```
+The test suite is automatically executed through GitHub Actions on every push and pull request.
 
 ---
 
